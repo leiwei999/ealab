@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>量子马丁网格 QTM-01 — EALab</title>
+<style>
+  :root{
+    --bg:#f6f9f8;--bg-soft:#eef3f1;--card:#ffffff;--line:#e2e9e6;--line-soft:#edf2f0;
+    --ink:#0f2922;--ink-dim:#5a7068;--ink-faint:#8fa39b;
+    --mint:#10b981;--mint-deep:#059669;--mint-soft:#d6f5e9;--mint-tint:#ecfbf4;--cyan:#0ea5b7;
+    --shadow:0 1px 3px rgba(15,41,34,.04),0 8px 24px rgba(15,41,34,.05);
+    --shadow-lift:0 4px 12px rgba(16,185,129,.12),0 16px 40px rgba(15,41,34,.10);
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft YaHei',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.7;-webkit-font-smoothing:antialiased;font-size:16px}
+  ::selection{background:var(--mint);color:#fff}
+  a{color:inherit}
+
+  header{position:sticky;top:0;z-index:50;background:rgba(246,249,248,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .nav{max-width:920px;margin:0 auto;padding:18px 28px;display:flex;align-items:center;justify-content:space-between}
+  .logo{display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:18px;letter-spacing:.3px;text-decoration:none;color:var(--ink)}
+  .logo .mark{width:32px;height:32px;border-radius:9px;background:var(--mint);display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;box-shadow:0 4px 12px rgba(16,185,129,.3)}
+  .logo b{font-weight:600}.logo .dim{color:var(--ink-dim);font-weight:400}
+  .back{font-size:14px;color:var(--ink-dim);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s}
+  .back:hover{color:var(--mint-deep)}
+
+  .wrap{max-width:920px;margin:0 auto;padding:0 28px}
+
+  /* 详情头部 */
+  .dhead{padding:56px 0 44px;position:relative}
+  .dhead::after{content:"";position:absolute;top:30px;right:0;width:320px;height:320px;background:radial-gradient(circle,rgba(16,185,129,.12),transparent 68%);border-radius:50%;z-index:-1}
+  .crumb{font-family:var(--mono);font-size:13px;color:var(--ink-faint);margin-bottom:22px;letter-spacing:.3px}
+  .crumb a{color:var(--ink-faint);text-decoration:none}.crumb a:hover{color:var(--mint-deep)}
+  .dtop{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+  .code-pill{font-family:var(--mono);font-size:13px;color:var(--mint-deep);background:var(--mint-tint);padding:5px 12px;border-radius:7px;font-weight:600}
+  .status-pill{font-size:13px;color:var(--mint);background:var(--mint-tint);padding:5px 13px;border-radius:30px;font-weight:600;display:inline-flex;align-items:center;gap:7px}
+  .status-pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+  .dhead h1{font-size:clamp(32px,5vw,48px);font-weight:650;letter-spacing:-1px;margin-bottom:14px;line-height:1.1}
+  .dhead .series{font-family:var(--mono);font-size:15px;color:var(--mint-deep);margin-bottom:20px}
+  .dhead .lead{font-size:18px;color:var(--ink-dim);max-width:680px;line-height:1.7}
+
+  /* 速览规格 */
+  .quickspecs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin:38px 0 8px}
+  .quickspecs .qs{background:var(--card);padding:20px 22px}
+  .quickspecs .qs .k{font-family:var(--mono);font-size:12px;color:var(--ink-faint);letter-spacing:.5px;margin-bottom:6px}
+  .quickspecs .qs .v{font-size:17px;font-weight:600}
+
+  /* 内容区块 */
+  .sec{padding:46px 0;border-bottom:1px solid var(--line)}
+  .sec:last-of-type{border-bottom:none}
+  .sec .label{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12.5px;letter-spacing:1.5px;color:var(--mint-deep);text-transform:uppercase;margin-bottom:18px;background:var(--mint-soft);padding:6px 13px;border-radius:30px}
+  .sec h2{font-size:25px;font-weight:650;letter-spacing:-.4px;margin-bottom:18px}
+  .sec p{font-size:16px;color:var(--ink-dim);margin-bottom:16px;max-width:720px}
+  .sec p strong{color:var(--ink);font-weight:600}
+
+  /* 三阶段流程 (入场/风控/离场) */
+  .flow{display:flex;flex-direction:column;gap:16px;margin-top:8px}
+  .flow .step{display:flex;gap:20px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 28px;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s}
+  .flow .step:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
+  .flow .step .ico{flex-shrink:0;width:48px;height:48px;border-radius:13px;background:var(--mint-soft);color:var(--mint-deep);display:grid;place-items:center;font-size:22px;font-weight:700;font-family:var(--mono)}
+  .flow .step .body h3{font-size:19px;font-weight:650;margin-bottom:8px}
+  .flow .step .body p{font-size:15.5px;color:var(--ink-dim);margin-bottom:0;max-width:none}
+
+  /* 风控层级 */
+  .risk-layers{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+  .risk-layers .rl{display:flex;align-items:flex-start;gap:16px;padding:18px 22px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--mint);border-radius:12px}
+  .risk-layers .rl .n{font-family:var(--mono);font-weight:700;color:var(--mint-deep);font-size:15px;flex-shrink:0;background:var(--mint-tint);width:28px;height:28px;border-radius:8px;display:grid;place-items:center}
+  .risk-layers .rl .t{font-size:15.5px;color:var(--ink-dim)}
+  .risk-layers .rl .t b{color:var(--ink)}
+
+  /* 适用性提示框 */
+  .callout{background:linear-gradient(135deg,#0f2922,#14463a);border-radius:18px;padding:32px 36px;margin-top:8px;position:relative;overflow:hidden}
+  .callout::after{content:"";position:absolute;top:-50px;right:-30px;width:240px;height:240px;background:radial-gradient(circle,rgba(16,185,129,.28),transparent 70%);border-radius:50%}
+  .callout h3{color:#f4faf7;font-size:18px;margin-bottom:12px;position:relative;z-index:1}
+  .callout p{color:#b8dccf;font-size:15.5px;margin-bottom:0;position:relative;z-index:1;max-width:none}
+
+  /* CTA */
+  .cta{text-align:center;padding:56px 0}
+  .cta h2{font-size:26px;font-weight:650;margin-bottom:12px}
+  .cta p{color:var(--ink-dim);margin-bottom:26px}
+  .cta a{display:inline-block;background:var(--mint);color:#fff;font-weight:600;font-size:16px;padding:14px 32px;border-radius:30px;text-decoration:none;box-shadow:0 6px 18px rgba(16,185,129,.32);transition:transform .2s,box-shadow .2s}
+  .cta a:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(16,185,129,.4)}
+
+  footer{border-top:1px solid var(--line);background:var(--bg-soft)}
+  .disc{max-width:920px;margin:0 auto;padding:26px 28px;font-size:13px;color:var(--ink-faint);line-height:1.8}
+
+  @media(max-width:720px){
+    .nav{padding:15px 20px}.wrap{padding:0 20px}
+    .dhead{padding:40px 0 34px}.dhead::after{width:220px;height:220px}
+    .dhead h1{font-size:30px}.dhead .lead{font-size:16.5px}
+    .sec{padding:36px 0}.sec h2{font-size:22px}
+    .flow .step{padding:22px;gap:16px}.flow .step .ico{width:42px;height:42px;font-size:19px}
+    .callout{padding:26px 24px}.cta{padding:44px 0}
+    .disc{padding:22px 20px}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="logo" href="../index.html">
+      <span class="mark">EA</span><span><b>EALab</b> <span class="dim">/ 量化策略研究</span></span>
+    </a>
+    <a class="back" href="../index.html">← 返回档案</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="dhead">
+    <div class="crumb"><a href="../index.html">策略档案</a> / Quantum 系列 / QTM-01</div>
+    <div class="dtop">
+      <span class="code-pill">QTM-01</span>
+      <span class="status-pill">实盘验证中</span>
+    </div>
+    <h1>量子马丁网格</h1>
+    <div class="series">Quantum 系列 · 双向马丁网格策略</div>
+    <p class="lead">基于均线偏离触发的双向网格系统。核心不在于"加仓回本"的赌性，而在于一套严格的风控边界——层数封顶与强制平仓，把马丁策略最致命的尾部风险关进笼子里。</p>
+  </div>
+
+  <div class="quickspecs">
+    <div class="qs"><div class="k">品种</div><div class="v">XAUUSD</div></div>
+    <div class="qs"><div class="k">类型</div><div class="v">双向马丁网格</div></div>
+    <div class="qs"><div class="k">平台</div><div class="v">MetaTrader 5</div></div>
+    <div class="qs"><div class="k">核心风控</div><div class="v">层数封顶 + 强平</div></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 设计理念 -->
+  <div class="sec">
+    <span class="label">设计理念</span>
+    <h2>把马丁的"无限"变成"有限"</h2>
+    <p>传统马丁策略的逻辑是：价格走反就加仓摊低成本，等一次回调就回本获利。它的胜率看起来很高，但隐藏着一个致命缺陷——<strong>在强趋势单边行情里，加仓没有尽头，一次极端行情就能吞掉账户。</strong></p>
+    <p>QTM-01 的设计出发点，正是承认并直面这个缺陷。它不假装马丁能"永远扛得住"，而是从一开始就给加仓画一条硬边界：<strong>层数封顶</strong>。封顶之后若价格继续不利，触发<strong>强制平仓</strong>，主动断臂。这意味着它放弃了"死扛等反转"的幻想，换来的是可计算、可承受的最大单次损失。</p>
+  </div>
+
+  <!-- 运作机制: 入场/加仓/离场 -->
+  <div class="sec">
+    <span class="label">运作机制</span>
+    <h2>策略如何运转</h2>
+    <div class="flow">
+      <div class="step">
+        <div class="ico">入</div>
+        <div class="body">
+          <h3>入场 — 均线偏离触发</h3>
+          <p>以移动均线作为价值中枢。当价格向上或向下偏离均线达到设定阈值时，在反方向开仓，押注价格回归。双向设计意味着多空两侧独立运作，各自管理各自的篮子。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="ico">加</div>
+        <div class="body">
+          <h3>加仓 — 分层网格，有上限</h3>
+          <p>价格继续不利时，按设定间距分层加仓，逐层摊低持仓均价。但加仓不是无限的——层数有明确上限。这是与传统马丁最本质的区别：<strong>加仓权被严格限制，而非任其膨胀。</strong></p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="ico">盈</div>
+        <div class="body">
+          <h3>止盈 — 篮子整体目标</h3>
+          <p>同方向所有持仓作为一个篮子整体管理，当篮子浮盈达到目标即整体平仓。止盈目标随层数增加而调整，保证每次回归都能覆盖该篮子的持仓成本并留出利润。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="ico">控</div>
+        <div class="body">
+          <h3>风控 — 封顶后强平断臂</h3>
+          <p>当加仓触及层数上限、价格仍继续向不利方向运行超过设定幅度时，系统主动强制平仓整个篮子。<strong>这一刀决定了策略的最大单次损失上限，是整套系统的生死线。</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 风控层级 -->
+  <div class="sec">
+    <span class="label">风控层级</span>
+    <h2>多重防线，逐级收紧</h2>
+    <p>QTM-01 的风控不是单一止损，而是一套逐级生效的防线体系：</p>
+    <div class="risk-layers">
+      <div class="rl"><span class="n">1</span><span class="t"><b>层数封顶</b> — 加仓总层数硬性限制，从源头杜绝无限加仓。</span></div>
+      <div class="rl"><span class="n">2</span><span class="t"><b>强制平仓</b> — 封顶后价格继续不利达阈值，主动断臂，锁定最大损失。</span></div>
+      <div class="rl"><span class="n">3</span><span class="t"><b>周期保护</b> — 特定时段（如周五收盘前）自动平仓，规避隔夜与周末跳空风险。</span></div>
+    </div>
+  </div>
+
+  <!-- 适用性与风险 -->
+  <div class="sec">
+    <span class="label">适用性与风险</span>
+    <h2>它适合什么，不适合什么</h2>
+    <p>QTM-01 在<strong>震荡与温和波动</strong>的市场环境中表现最自然——价格频繁回归均线，篮子能稳定止盈。</p>
+    <p>它的考验来自<strong>强趋势单边行情</strong>。这种环境下，止盈难以触发，风控强平会产生较大的单次损失。QTM-01 的应对不是"扛"，而是用封顶强平把这种损失控制在可承受范围内——这正是它区别于裸奔马丁的核心价值。</p>
+    <div class="callout">
+      <h3>核心研究结论</h3>
+      <p>在真实成交数据中，正是这套止损机制构成了策略薄利之上的正期望。移除它去"等待反转"，会让账户暴露在足以抹平全部利润的极端损失之下。<strong>止损是收益的地基，不是敌人。</strong></p>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <h2>了解更多</h2>
+    <p>对该策略的研究细节或合作有兴趣，欢迎联系。</p>
+    <a href="../index.html#contact">联系咨询</a>
+  </div>
+
+</div>
+
+<footer>
+  <div class="disc">
+    风险提示：本页内容为量化交易策略的研究与技术分析，仅供学习与技术交流，不构成任何投资建议、收益承诺或要约。算法交易存在重大资金损失风险，历史回测表现不代表未来收益。马丁/网格类策略在强趋势行情中存在显著回撤风险，使用前请充分理解其逻辑与风险。
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>信号复制系统 SIG-01 — EALab</title>
+<style>
+  :root{
+    --bg:#f6f9f8;--bg-soft:#eef3f1;--card:#ffffff;--line:#e2e9e6;--line-soft:#edf2f0;
+    --ink:#0f2922;--ink-dim:#5a7068;--ink-faint:#8fa39b;
+    --mint:#10b981;--mint-deep:#059669;--mint-soft:#d6f5e9;--mint-tint:#ecfbf4;--cyan:#0ea5b7;
+    --shadow:0 1px 3px rgba(15,41,34,.04),0 8px 24px rgba(15,41,34,.05);
+    --shadow-lift:0 4px 12px rgba(16,185,129,.12),0 16px 40px rgba(15,41,34,.10);
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft YaHei',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.7;-webkit-font-smoothing:antialiased;font-size:16px}
+  ::selection{background:var(--mint);color:#fff}
+  a{color:inherit}
+
+  header{position:sticky;top:0;z-index:50;background:rgba(246,249,248,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .nav{max-width:920px;margin:0 auto;padding:18px 28px;display:flex;align-items:center;justify-content:space-between}
+  .logo{display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:18px;letter-spacing:.3px;text-decoration:none;color:var(--ink)}
+  .logo .mark{width:32px;height:32px;border-radius:9px;background:var(--mint);display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;box-shadow:0 4px 12px rgba(16,185,129,.3)}
+  .logo b{font-weight:600}.logo .dim{color:var(--ink-dim);font-weight:400}
+  .back{font-size:14px;color:var(--ink-dim);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s}
+  .back:hover{color:var(--mint-deep)}
+
+  .wrap{max-width:920px;margin:0 auto;padding:0 28px}
+
+  /* 详情头部 */
+  .dhead{padding:56px 0 44px;position:relative}
+  .dhead::after{content:"";position:absolute;top:30px;right:0;width:320px;height:320px;background:radial-gradient(circle,rgba(16,185,129,.12),transparent 68%);border-radius:50%;z-index:-1}
+  .crumb{font-family:var(--mono);font-size:13px;color:var(--ink-faint);margin-bottom:22px;letter-spacing:.3px}
+  .crumb a{color:var(--ink-faint);text-decoration:none}.crumb a:hover{color:var(--mint-deep)}
+  .dtop{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+  .code-pill{font-family:var(--mono);font-size:13px;color:var(--mint-deep);background:var(--mint-tint);padding:5px 12px;border-radius:7px;font-weight:600}
+  .status-pill{font-size:13px;color:var(--mint);background:var(--mint-tint);padding:5px 13px;border-radius:30px;font-weight:600;display:inline-flex;align-items:center;gap:7px}
+  .status-pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+  .status-pill.pill-bt{color:var(--cyan);background:#e0f5f8}
+  .status-pill.pill-dev{color:#64748b;background:#f1f5f9}
+  .dhead h1{font-size:clamp(32px,5vw,48px);font-weight:650;letter-spacing:-1px;margin-bottom:14px;line-height:1.1}
+  .dhead .series{font-family:var(--mono);font-size:15px;color:var(--mint-deep);margin-bottom:20px}
+  .dhead .lead{font-size:18px;color:var(--ink-dim);max-width:680px;line-height:1.7}
+
+  /* 速览规格 */
+  .quickspecs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin:38px 0 8px}
+  .quickspecs .qs{background:var(--card);padding:20px 22px}
+  .quickspecs .qs .k{font-family:var(--mono);font-size:12px;color:var(--ink-faint);letter-spacing:.5px;margin-bottom:6px}
+  .quickspecs .qs .v{font-size:17px;font-weight:600}
+
+  /* 内容区块 */
+  .sec{padding:46px 0;border-bottom:1px solid var(--line)}
+  .sec:last-of-type{border-bottom:none}
+  .sec .label{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12.5px;letter-spacing:1.5px;color:var(--mint-deep);text-transform:uppercase;margin-bottom:18px;background:var(--mint-soft);padding:6px 13px;border-radius:30px}
+  .sec h2{font-size:25px;font-weight:650;letter-spacing:-.4px;margin-bottom:18px}
+  .sec p{font-size:16px;color:var(--ink-dim);margin-bottom:16px;max-width:720px}
+  .sec p strong{color:var(--ink);font-weight:600}
+
+  /* 三阶段流程 (入场/风控/离场) */
+  .flow{display:flex;flex-direction:column;gap:16px;margin-top:8px}
+  .flow .step{display:flex;gap:20px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 28px;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s}
+  .flow .step:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
+  .flow .step .ico{flex-shrink:0;width:48px;height:48px;border-radius:13px;background:var(--mint-soft);color:var(--mint-deep);display:grid;place-items:center;font-size:22px;font-weight:700;font-family:var(--mono)}
+  .flow .step .body h3{font-size:19px;font-weight:650;margin-bottom:8px}
+  .flow .step .body p{font-size:15.5px;color:var(--ink-dim);margin-bottom:0;max-width:none}
+
+  /* 风控层级 */
+  .risk-layers{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+  .risk-layers .rl{display:flex;align-items:flex-start;gap:16px;padding:18px 22px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--mint);border-radius:12px}
+  .risk-layers .rl .n{font-family:var(--mono);font-weight:700;color:var(--mint-deep);font-size:15px;flex-shrink:0;background:var(--mint-tint);width:28px;height:28px;border-radius:8px;display:grid;place-items:center}
+  .risk-layers .rl .t{font-size:15.5px;color:var(--ink-dim)}
+  .risk-layers .rl .t b{color:var(--ink)}
+
+  /* 适用性提示框 */
+  .callout{background:linear-gradient(135deg,#0f2922,#14463a);border-radius:18px;padding:32px 36px;margin-top:8px;position:relative;overflow:hidden}
+  .callout::after{content:"";position:absolute;top:-50px;right:-30px;width:240px;height:240px;background:radial-gradient(circle,rgba(16,185,129,.28),transparent 70%);border-radius:50%}
+  .callout h3{color:#f4faf7;font-size:18px;margin-bottom:12px;position:relative;z-index:1}
+  .callout p{color:#b8dccf;font-size:15.5px;margin-bottom:0;position:relative;z-index:1;max-width:none}
+
+  /* CTA */
+  .cta{text-align:center;padding:56px 0}
+  .cta h2{font-size:26px;font-weight:650;margin-bottom:12px}
+  .cta p{color:var(--ink-dim);margin-bottom:26px}
+  .cta a{display:inline-block;background:var(--mint);color:#fff;font-weight:600;font-size:16px;padding:14px 32px;border-radius:30px;text-decoration:none;box-shadow:0 6px 18px rgba(16,185,129,.32);transition:transform .2s,box-shadow .2s}
+  .cta a:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(16,185,129,.4)}
+
+  footer{border-top:1px solid var(--line);background:var(--bg-soft)}
+  .disc{max-width:920px;margin:0 auto;padding:26px 28px;font-size:13px;color:var(--ink-faint);line-height:1.8}
+
+  @media(max-width:720px){
+    .nav{padding:15px 20px}.wrap{padding:0 20px}
+    .dhead{padding:40px 0 34px}.dhead::after{width:220px;height:220px}
+    .dhead h1{font-size:30px}.dhead .lead{font-size:16.5px}
+    .sec{padding:36px 0}.sec h2{font-size:22px}
+    .flow .step{padding:22px;gap:16px}.flow .step .ico{width:42px;height:42px;font-size:19px}
+    .callout{padding:26px 24px}.cta{padding:44px 0}
+    .disc{padding:22px 20px}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="logo" href="../index.html">
+      <span class="mark">EA</span><span><b>EALab</b> <span class="dim">/ 量化策略研究</span></span>
+    </a>
+    <a class="back" href="../index.html">← 返回档案</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="dhead">
+    <div class="crumb"><a href="../index.html">策略档案</a> / Signal 系列 / SIG-01</div>
+    <div class="dtop">
+      <span class="code-pill">SIG-01</span>
+      <span class="status-pill ">实盘运行</span>
+    </div>
+    <h1>信号复制系统</h1>
+    <div class="series">Signal 系列 · 跨平台信号复制基础设施</div>
+    <p class="lead">连接发送端与接收端的信号复制系统。支持挂单同步、低延迟心跳、协议版本兼容，是搭建跟单与多账户同步的底层基础设施，本身不含交易决策。</p>
+  </div>
+
+  <div class="quickspecs">
+    <div class="qs"><div class="k">平台</div><div class="v">MT4 / MT5</div></div>
+    <div class="qs"><div class="k">类型</div><div class="v">信号复制</div></div>
+    <div class="qs"><div class="k">延迟</div><div class="v">约 50ms</div></div>
+    <div class="qs"><div class="k">核心</div><div class="v">共享内存+协议</div></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="sec">
+    <span class="label">设计理念</span>
+    <h2>它是基础设施，不是策略</h2>
+    <p>SIG-01 与其他档案不同——它<strong>不做任何交易决策</strong>，不判断方向、不计算仓位。它解决的是一个纯工程问题：<strong>如何把一个账户的交易动作，快速、准确、稳定地复制到另一个或多个账户。</strong></p>
+    <p>这听起来简单，难点全在细节：挂单怎么同步？发送端断线了接收端怎么办？新旧版本如何兼容不出错？延迟能压到多低？SIG-01 用共享内存通信 + 自定义协议把这些问题逐一解决，构成一套可靠的复制底座。</p>
+  </div>
+
+  <div class="sec">
+    <span class="label">运作机制</span>
+    <h2>策略如何运转</h2>
+    <div class="flow">
+      <div class="step"><div class="ico">发</div><div class="body"><h3>发送端 — 采集与发布</h3><p>发送端实时扫描持仓与挂单，序列化后通过共享内存高速发布，含心跳时间戳。</p></div></div>
+      <div class="step"><div class="ico">协</div><div class="body"><h3>协议 — 字节级兼容</h3><p>自定义二进制协议，字段扩展时保持新旧版本互相兼容，升级一端不影响另一端。</p></div></div>
+      <div class="step"><div class="ico">收</div><div class="body"><h3>接收端 — 解析与执行</h3><p>接收端读取共享内存，校验协议版本与数据完整性后，在本地账户复现对应动作。</p></div></div>
+      <div class="step"><div class="ico">单</div><div class="body"><h3>挂单同步 — 完整复制</h3><p>不仅复制持仓，挂单（限价/止损/止损限价）也同步复制，包括触发价与原始单关联。</p></div></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="label">工程特性</span>
+    <h2>可靠复制的四个支柱</h2>
+    <div class="risk-layers">
+      <div class="rl"><span class="n">1</span><span class="t"><b>低延迟心跳</b> — 心跳周期压缩至约 50ms，远端变化快速被感知。</span></div>
+      <div class="rl"><span class="n">2</span><span class="t"><b>协议版本兼容</b> — 字节布局向后兼容，单端升级不破坏整体。</span></div>
+      <div class="rl"><span class="n">3</span><span class="t"><b>数据完整性校验</b> — CRC 校验 + 协议号检查，杜绝错位与脏数据。</span></div>
+      <div class="rl"><span class="n">4</span><span class="t"><b>挂单完整同步</b> — 持仓与挂单一并复制，不遗漏触发价等关键信息。</span></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="label">适用性与定位</span>
+    <h2>它能做什么</h2>
+    <p>SIG-01 是<strong>底层基础设施</strong>：它可以作为跟单系统、多账户同步、信号分发的技术底座。任何需要"一处动作、多处复现"的场景，它都能承载。</p>
+    <p>需要明确的是：它的可靠性取决于复制的<strong>源</strong>。SIG-01 只负责忠实复制，源账户的策略好坏、风险高低，它不做判断也不做过滤。它是管道，不是水源。</p>
+    <div class="callout">
+      <h3>技术定位说明</h3>
+      <p>SIG-01 是工程基础设施而非交易策略。它的价值在于复制的速度、准确与稳定，不涉及任何收益承诺。被复制的交易本身的风险，由源策略决定。</p>
+    </div>
+  </div>
+
+  <div class="cta">
+    <h2>了解更多</h2>
+    <p>对该策略的研究细节或合作有兴趣，欢迎联系。</p>
+    <a href="../index.html#contact">联系咨询</a>
+  </div>
+
+</div>
+
+<footer>
+  <div class="disc">
+    风险提示：本页内容为量化交易策略的研究与技术分析，仅供学习与技术交流，不构成任何投资建议、收益承诺或要约。算法交易存在重大资金损失风险，历史回测表现不代表未来收益。使用前请充分理解其逻辑与风险。
+  </div>
+</footer>
+
+</body>
+</html>

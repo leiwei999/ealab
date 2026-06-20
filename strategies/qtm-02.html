@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSI 智能网格 QTM-02 — EALab</title>
+<style>
+  :root{
+    --bg:#f6f9f8;--bg-soft:#eef3f1;--card:#ffffff;--line:#e2e9e6;--line-soft:#edf2f0;
+    --ink:#0f2922;--ink-dim:#5a7068;--ink-faint:#8fa39b;
+    --mint:#10b981;--mint-deep:#059669;--mint-soft:#d6f5e9;--mint-tint:#ecfbf4;--cyan:#0ea5b7;
+    --shadow:0 1px 3px rgba(15,41,34,.04),0 8px 24px rgba(15,41,34,.05);
+    --shadow-lift:0 4px 12px rgba(16,185,129,.12),0 16px 40px rgba(15,41,34,.10);
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft YaHei',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.7;-webkit-font-smoothing:antialiased;font-size:16px}
+  ::selection{background:var(--mint);color:#fff}
+  a{color:inherit}
+
+  header{position:sticky;top:0;z-index:50;background:rgba(246,249,248,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .nav{max-width:920px;margin:0 auto;padding:18px 28px;display:flex;align-items:center;justify-content:space-between}
+  .logo{display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:18px;letter-spacing:.3px;text-decoration:none;color:var(--ink)}
+  .logo .mark{width:32px;height:32px;border-radius:9px;background:var(--mint);display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;box-shadow:0 4px 12px rgba(16,185,129,.3)}
+  .logo b{font-weight:600}.logo .dim{color:var(--ink-dim);font-weight:400}
+  .back{font-size:14px;color:var(--ink-dim);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s}
+  .back:hover{color:var(--mint-deep)}
+
+  .wrap{max-width:920px;margin:0 auto;padding:0 28px}
+
+  /* 详情头部 */
+  .dhead{padding:56px 0 44px;position:relative}
+  .dhead::after{content:"";position:absolute;top:30px;right:0;width:320px;height:320px;background:radial-gradient(circle,rgba(16,185,129,.12),transparent 68%);border-radius:50%;z-index:-1}
+  .crumb{font-family:var(--mono);font-size:13px;color:var(--ink-faint);margin-bottom:22px;letter-spacing:.3px}
+  .crumb a{color:var(--ink-faint);text-decoration:none}.crumb a:hover{color:var(--mint-deep)}
+  .dtop{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+  .code-pill{font-family:var(--mono);font-size:13px;color:var(--mint-deep);background:var(--mint-tint);padding:5px 12px;border-radius:7px;font-weight:600}
+  .status-pill{font-size:13px;color:var(--mint);background:var(--mint-tint);padding:5px 13px;border-radius:30px;font-weight:600;display:inline-flex;align-items:center;gap:7px}
+  .status-pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+  .status-pill.pill-bt{color:var(--cyan);background:#e0f5f8}
+  .status-pill.pill-dev{color:#64748b;background:#f1f5f9}
+  .dhead h1{font-size:clamp(32px,5vw,48px);font-weight:650;letter-spacing:-1px;margin-bottom:14px;line-height:1.1}
+  .dhead .series{font-family:var(--mono);font-size:15px;color:var(--mint-deep);margin-bottom:20px}
+  .dhead .lead{font-size:18px;color:var(--ink-dim);max-width:680px;line-height:1.7}
+
+  /* 速览规格 */
+  .quickspecs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin:38px 0 8px}
+  .quickspecs .qs{background:var(--card);padding:20px 22px}
+  .quickspecs .qs .k{font-family:var(--mono);font-size:12px;color:var(--ink-faint);letter-spacing:.5px;margin-bottom:6px}
+  .quickspecs .qs .v{font-size:17px;font-weight:600}
+
+  /* 内容区块 */
+  .sec{padding:46px 0;border-bottom:1px solid var(--line)}
+  .sec:last-of-type{border-bottom:none}
+  .sec .label{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12.5px;letter-spacing:1.5px;color:var(--mint-deep);text-transform:uppercase;margin-bottom:18px;background:var(--mint-soft);padding:6px 13px;border-radius:30px}
+  .sec h2{font-size:25px;font-weight:650;letter-spacing:-.4px;margin-bottom:18px}
+  .sec p{font-size:16px;color:var(--ink-dim);margin-bottom:16px;max-width:720px}
+  .sec p strong{color:var(--ink);font-weight:600}
+
+  /* 三阶段流程 (入场/风控/离场) */
+  .flow{display:flex;flex-direction:column;gap:16px;margin-top:8px}
+  .flow .step{display:flex;gap:20px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 28px;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s}
+  .flow .step:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
+  .flow .step .ico{flex-shrink:0;width:48px;height:48px;border-radius:13px;background:var(--mint-soft);color:var(--mint-deep);display:grid;place-items:center;font-size:22px;font-weight:700;font-family:var(--mono)}
+  .flow .step .body h3{font-size:19px;font-weight:650;margin-bottom:8px}
+  .flow .step .body p{font-size:15.5px;color:var(--ink-dim);margin-bottom:0;max-width:none}
+
+  /* 风控层级 */
+  .risk-layers{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+  .risk-layers .rl{display:flex;align-items:flex-start;gap:16px;padding:18px 22px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--mint);border-radius:12px}
+  .risk-layers .rl .n{font-family:var(--mono);font-weight:700;color:var(--mint-deep);font-size:15px;flex-shrink:0;background:var(--mint-tint);width:28px;height:28px;border-radius:8px;display:grid;place-items:center}
+  .risk-layers .rl .t{font-size:15.5px;color:var(--ink-dim)}
+  .risk-layers .rl .t b{color:var(--ink)}
+
+  /* 适用性提示框 */
+  .callout{background:linear-gradient(135deg,#0f2922,#14463a);border-radius:18px;padding:32px 36px;margin-top:8px;position:relative;overflow:hidden}
+  .callout::after{content:"";position:absolute;top:-50px;right:-30px;width:240px;height:240px;background:radial-gradient(circle,rgba(16,185,129,.28),transparent 70%);border-radius:50%}
+  .callout h3{color:#f4faf7;font-size:18px;margin-bottom:12px;position:relative;z-index:1}
+  .callout p{color:#b8dccf;font-size:15.5px;margin-bottom:0;position:relative;z-index:1;max-width:none}
+
+  /* CTA */
+  .cta{text-align:center;padding:56px 0}
+  .cta h2{font-size:26px;font-weight:650;margin-bottom:12px}
+  .cta p{color:var(--ink-dim);margin-bottom:26px}
+  .cta a{display:inline-block;background:var(--mint);color:#fff;font-weight:600;font-size:16px;padding:14px 32px;border-radius:30px;text-decoration:none;box-shadow:0 6px 18px rgba(16,185,129,.32);transition:transform .2s,box-shadow .2s}
+  .cta a:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(16,185,129,.4)}
+
+  footer{border-top:1px solid var(--line);background:var(--bg-soft)}
+  .disc{max-width:920px;margin:0 auto;padding:26px 28px;font-size:13px;color:var(--ink-faint);line-height:1.8}
+
+  @media(max-width:720px){
+    .nav{padding:15px 20px}.wrap{padding:0 20px}
+    .dhead{padding:40px 0 34px}.dhead::after{width:220px;height:220px}
+    .dhead h1{font-size:30px}.dhead .lead{font-size:16.5px}
+    .sec{padding:36px 0}.sec h2{font-size:22px}
+    .flow .step{padding:22px;gap:16px}.flow .step .ico{width:42px;height:42px;font-size:19px}
+    .callout{padding:26px 24px}.cta{padding:44px 0}
+    .disc{padding:22px 20px}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="logo" href="../index.html">
+      <span class="mark">EA</span><span><b>EALab</b> <span class="dim">/ 量化策略研究</span></span>
+    </a>
+    <a class="back" href="../index.html">← 返回档案</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="dhead">
+    <div class="crumb"><a href="../index.html">策略档案</a> / Quantum 系列 / QTM-02</div>
+    <div class="dtop">
+      <span class="code-pill">QTM-02</span>
+      <span class="status-pill pill-bt">回测完成</span>
+    </div>
+    <h1>RSI 智能网格</h1>
+    <div class="series">Quantum 系列 · 逆势均值回归网格</div>
+    <p class="lead">逆势均值回归策略，以双时间框架 RSI 捕捉超买超卖，网格分层建仓，配合智能护航离场。方向自适应——多空两侧采用不同的分层上限与离场参数。</p>
+  </div>
+
+  <div class="quickspecs">
+    <div class="qs"><div class="k">品种</div><div class="v">XAUUSD</div></div>
+    <div class="qs"><div class="k">类型</div><div class="v">均值回归</div></div>
+    <div class="qs"><div class="k">验证</div><div class="v">一年真实M1</div></div>
+    <div class="qs"><div class="k">核心</div><div class="v">双框架RSI+护航</div></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="sec">
+    <span class="label">设计理念</span>
+    <h2>在极端处入场，用护航离场</h2>
+    <p>均值回归的核心假设是：价格在极端超买/超卖后倾向于回归。QTM-02 用<strong>双时间框架 RSI</strong>来定义"极端"——大周期判断趋势背景，小周期捕捉入场时机，两者共振才出手，过滤掉大量噪音信号。</p>
+    <p>入场之后，离场不靠死扛，而靠<strong>智能护航</strong>：浮盈达到一定水平后启动动态跟踪，回吐到设定幅度即落袋。这让策略既能吃到回归的主升段，又能在回归乏力时及时离场。</p>
+  </div>
+
+  <div class="sec">
+    <span class="label">运作机制</span>
+    <h2>策略如何运转</h2>
+    <div class="flow">
+      <div class="step"><div class="ico">入</div><div class="body"><h3>入场 — 双框架RSI共振</h3><p>大小两个时间框架的 RSI 同时进入超买或超卖区间时，在反方向开仓，押注价格回归。</p></div></div>
+      <div class="step"><div class="ico">层</div><div class="body"><h3>分层 — 方向自适应网格</h3><p>价格继续极端时分层加仓摊低成本。关键在于多空采用不同上限——在牛市背景下，空头篮子的分层上限收得更紧。</p></div></div>
+      <div class="step"><div class="ico">盈</div><div class="body"><h3>止盈 — 篮子目标</h3><p>同方向持仓整体管理，浮盈达目标即整体了结，目标随层数动态调整。</p></div></div>
+      <div class="step"><div class="ico">控</div><div class="body"><h3>护航 — 动态跟踪离场</h3><p>浮盈达启动线后开启拖尾跟踪，锁定已有利润；硬止损与日内亏损限额构成底层防线。</p></div></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="label">风控层级</span>
+    <h2>多重防线</h2>
+    <div class="risk-layers">
+      <div class="rl"><span class="n">1</span><span class="t"><b>双框架信号过滤</b> — 两个周期 RSI 共振才入场，大幅降低假信号。</span></div>
+      <div class="rl"><span class="n">2</span><span class="t"><b>方向自适应上限</b> — 多空分层上限分别设定，逆势方向更保守。</span></div>
+      <div class="rl"><span class="n">3</span><span class="t"><b>智能护航离场</b> — 浮盈动态跟踪，回归乏力时及时锁利。</span></div>
+      <div class="rl"><span class="n">4</span><span class="t"><b>硬止损 + 日亏限额</b> — 底层双保险，限制单日与单篮的最大损失。</span></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="label">适用性与定位</span>
+    <h2>它适合什么，不适合什么</h2>
+    <p>QTM-02 适合<strong>有波动、会回归</strong>的市场——价格频繁触及极端又回落，正是均值回归的主场。一年真实 M1 数据验证显示其在这类环境中表现稳定。</p>
+    <p>它的弱点是<strong>持续单边突破</strong>：当价格"极端了还能更极端"，逆势入场会连续受损。方向自适应的分层上限与护航离场，正是为了在这种行情里快速收手、控制损失。需强调：回测验证仅覆盖特定市场区间，相反行情下的表现应保守看待。</p>
+    <div class="callout">
+      <h3>核心研究原则</h3>
+      <p>回测表现不等于实盘表现。QTM-02 的漂亮数据来自特定市场区间，任何均值回归策略在单边行情中都会承压。上线前需以真实账户小仓位长期验证，回测结论应整体打折看待。</p>
+    </div>
+  </div>
+
+  <div class="cta">
+    <h2>了解更多</h2>
+    <p>对该策略的研究细节或合作有兴趣，欢迎联系。</p>
+    <a href="../index.html#contact">联系咨询</a>
+  </div>
+
+</div>
+
+<footer>
+  <div class="disc">
+    风险提示：本页内容为量化交易策略的研究与技术分析，仅供学习与技术交流，不构成任何投资建议、收益承诺或要约。算法交易存在重大资金损失风险，历史回测表现不代表未来收益。使用前请充分理解其逻辑与风险。
+  </div>
+</footer>
+
+</body>
+</html>

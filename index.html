@@ -124,6 +124,10 @@
   .card .spec{display:flex;justify-content:space-between;font-size:14px}
   .card .spec .k{color:var(--ink-faint);font-family:var(--mono)}
   .card .spec .v{color:var(--ink);font-weight:500}
+  .card-link{text-decoration:none;color:inherit;cursor:pointer}
+  .card .more{margin-top:16px;font-size:13.5px;font-weight:600;color:var(--accent,var(--mint-deep));font-family:var(--mono);letter-spacing:.3px;transition:transform .2s}
+  .card-link:hover .more{transform:translateX(4px)}
+  .card .more.soon{color:var(--ink-faint);font-weight:500}
 
   /* ===== 方法论 ===== */
   .method{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:18px}
@@ -160,6 +164,35 @@
   .foot .col a:hover{color:var(--mint-deep)}
   .disclaimer{border-top:1px solid var(--line);background:var(--bg)}
   .disclaimer .inner{max-width:1180px;margin:0 auto;padding:24px 28px;font-size:13px;color:var(--ink-faint);line-height:1.8}
+
+  /* ===== 联系区 ===== */
+  .contact-box{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:48px 52px;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;box-shadow:var(--shadow)}
+  .contact-text .label{display:inline-flex;align-items:center;font-family:var(--mono);font-size:12.5px;letter-spacing:1.5px;color:var(--mint-deep);background:var(--mint-soft);padding:6px 13px;border-radius:30px;margin-bottom:16px}
+  .contact-text h2{font-size:26px;font-weight:650;letter-spacing:-.4px;margin-bottom:10px}
+  .contact-text p{font-size:15.5px;color:var(--ink-dim);max-width:420px}
+  .contact-action{flex-shrink:0}
+  .reveal-btn{background:var(--mint);color:#fff;font-weight:600;font-size:15.5px;font-family:var(--sans);border:none;padding:14px 30px;border-radius:30px;cursor:pointer;box-shadow:0 6px 18px rgba(16,185,129,.32);transition:transform .2s,box-shadow .2s}
+  .reveal-btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(16,185,129,.4)}
+  .reveal-panel{animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .qq-link{display:flex;align-items:center;gap:16px;text-decoration:none;background:var(--mint-tint);border:1px solid var(--mint-soft);border-radius:16px;padding:18px 24px;transition:transform .2s,box-shadow .2s;margin-bottom:12px}
+  .qq-link:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
+  .qq-ico{width:48px;height:48px;border-radius:13px;background:var(--mint);color:#fff;display:grid;place-items:center;font-weight:700;font-family:var(--mono);font-size:17px;flex-shrink:0}
+  .qq-body{display:flex;flex-direction:column;min-width:0}
+  .qq-num{font-family:var(--mono);font-size:22px;font-weight:650;color:var(--ink);letter-spacing:.5px}
+  .qq-hint{font-size:13.5px;color:var(--mint-deep);font-weight:600}
+  /* 邮箱卡片 青色系区分 */
+  .mail-link{background:#e0f5f8;border-color:#c4ebf0}
+  .mail-ico{background:var(--cyan);font-size:22px}
+  .mail-num{font-size:16px;word-break:break-all}
+  .mail-link .qq-hint{color:var(--cyan)}
+  .qq-tip{font-size:13px;color:var(--ink-faint);margin-top:12px;text-align:center}
+  .qq-tip b{color:var(--ink-dim)}
+  @media(max-width:720px){
+    .contact-box{padding:34px 26px;border-radius:20px;flex-direction:column;align-items:flex-start;gap:26px}
+    .contact-text h2{font-size:22px}
+    .contact-action{width:100%}.reveal-btn{width:100%}
+  }
 
   /* ===== 移动端优化 ===== */
   @media(max-width:720px){
@@ -270,7 +303,38 @@
   </div>
 </div>
 
-<footer id="contact">
+<!-- ===== 联系 ===== -->
+<section class="block" id="contact">
+  <div class="contact-box">
+    <div class="contact-text">
+      <span class="label">GET IN TOUCH</span>
+      <h2>研究合作 · 策略咨询</h2>
+      <p>对策略研究、技术细节或合作有兴趣，欢迎通过 QQ 联系。点击下方按钮显示联系方式。</p>
+    </div>
+    <div class="contact-action">
+      <button id="revealBtn" class="reveal-btn" onclick="revealContact()">显示联系方式</button>
+      <div id="contactReveal" class="reveal-panel" hidden>
+        <a class="qq-link" href="tencent://message/?uin=15544616&Site=EALab&Menu=yes" target="_blank" rel="noopener">
+          <span class="qq-ico">QQ</span>
+          <span class="qq-body">
+            <span class="qq-num">15544616</span>
+            <span class="qq-hint">点击直接发起会话 →</span>
+          </span>
+        </a>
+        <a class="qq-link mail-link" href="mailto:fukumoto09132@gmail.com">
+          <span class="qq-ico mail-ico">@</span>
+          <span class="qq-body">
+            <span class="qq-num mail-num">fukumoto09132@gmail.com</span>
+            <span class="qq-hint">点击发送邮件 →</span>
+          </span>
+        </a>
+        <p class="qq-tip">若链接未自动打开，请手动添加 QQ：<b>15544616</b></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
   <div class="foot">
     <div class="col" style="max-width:320px">
       <div class="logo" style="margin-bottom:16px">
@@ -287,8 +351,8 @@
     </div>
     <div class="col">
       <h5>联系</h5>
-      <a href="#">研究合作咨询</a>
-      <a href="#">策略定制</a>
+      <a href="#contact">研究合作咨询</a>
+      <a href="#contact">策略定制</a>
     </div>
   </div>
   <div class="disclaimer">
@@ -299,29 +363,34 @@
 </footer>
 
 <script>
+  function revealContact(){
+    document.getElementById('contactReveal').hidden=false;
+    document.getElementById('revealBtn').style.display='none';
+  }
   const STRATS = [
-    {series:'hedge', sname:'Hedge 系列', code:'HDG-01', name:'对冲网格系统', status:'live',
+    {series:'hedge', sname:'Hedge 系列', code:'HDG-01', link:'strategies/hdg-01.html', name:'对冲网格系统', status:'live',
      desc:'双向对冲网格策略，面向高波动金属品种。以分层篮子管理 + 深档止盈 + 拖尾保护构成多重风控层级。',
      specs:[['品种','XAUUSD'],['类型','对冲网格'],['周期','M1 / M5'],['状态','实盘验证中']]},
     {series:'quantum', sname:'Quantum 系列', code:'QTM-01', name:'量子马丁网格', status:'live',
+     link:'strategies/qtm-01.html',
      desc:'基于均线偏离的双向马丁网格。层数封顶 + 强平保护构成核心风控，杜绝无限加仓导致的尾部风险。',
      specs:[['品种','XAUUSD'],['类型','马丁网格'],['风控','层数封顶+强平'],['状态','实盘验证中']]},
-    {series:'quantum', sname:'Quantum 系列', code:'QTM-02', name:'RSI 智能网格', status:'bt',
+    {series:'quantum', sname:'Quantum 系列', code:'QTM-02', link:'strategies/qtm-02.html', name:'RSI 智能网格', status:'bt',
      desc:'逆势均值回归 + 网格分层 + 智能护航离场。双时间框架 RSI 入场信号，方向自适应分层上限。',
      specs:[['品种','XAUUSD'],['类型','均值回归'],['验证','一年真实M1'],['状态','回测完成']]},
-    {series:'trend', sname:'Trend 系列', code:'TRD-01', name:'趋势回踩系统', status:'bt',
+    {series:'trend', sname:'Trend 系列', code:'TRD-01', link:'strategies/trd-01.html', name:'趋势回踩系统', status:'bt',
      desc:'EMA 趋势过滤 + 回踩入场 + RSI 确认。多周期协同，仅在主趋势方向捕捉回踩机会。',
      specs:[['品种','XAUUSD'],['类型','趋势回踩'],['周期','H1 / H4'],['状态','回测完成']]},
-    {series:'trend', sname:'Trend 系列', code:'TRD-02', name:'多周期趋势跟踪', status:'bt',
+    {series:'trend', sname:'Trend 系列', code:'TRD-02', link:'strategies/trd-02.html', name:'多周期趋势跟踪', status:'bt',
      desc:'H4 趋势方向 + 多周期入场过滤，全金额制管理。图形化面板与按钮交互，适配多品种。',
      specs:[['品种','XAUUSD'],['类型','趋势跟踪'],['管理','全金额制'],['状态','回测完成']]},
-    {series:'trend', sname:'Trend 系列', code:'TRD-03', name:'四确定性趋势', status:'dev',
+    {series:'trend', sname:'Trend 系列', code:'TRD-03', link:'strategies/trd-03.html', name:'四确定性趋势', status:'dev',
      desc:'以"带止损入场、固定盈亏比、明确资金管理、系统一致性"为框架的低频趋势系统。ATR 动态止损，3:1 盈亏比。',
      specs:[['品种','XAUUSD'],['类型','低频趋势'],['盈亏比','3 : 1'],['状态','研发中']]},
-    {series:'trend', sname:'Trend 系列', code:'TRD-04', name:'集群剥头皮猎手', status:'dev',
+    {series:'trend', sname:'Trend 系列', code:'TRD-04', link:'strategies/trd-04.html', name:'集群剥头皮猎手', status:'dev',
      desc:'双保险止损 + 智能止盈的集群剥头皮系统，面向金属品种的短线机会捕捉。',
      specs:[['品种','XAUUSD'],['类型','剥头皮'],['止损','双保险'],['状态','研发中']]},
-    {series:'signal', sname:'Signal 系列', code:'SIG-01', name:'信号复制系统', status:'live',
+    {series:'signal', sname:'Signal 系列', code:'SIG-01', link:'strategies/sig-01.html', name:'信号复制系统', status:'live',
      desc:'跨平台信号复制基础设施（发送端 + 接收端）。支持挂单同步、低延迟心跳、协议版本兼容，构成跟单系统底座。',
      specs:[['平台','MT4 / MT5'],['类型','信号复制'],['延迟','约 50ms'],['状态','实盘运行']]},
   ];
@@ -335,13 +404,16 @@
     const grid=document.getElementById('grid');grid.innerHTML='';
     STRATS.filter(s=>filter==='all'||s.series===filter).forEach(s=>{
       const [stc,stl]=STATUS[s.status];const col=COLORS[s.series];
-      const el=document.createElement('div');el.className='card';
+      const el=document.createElement(s.link?'a':'div');el.className='card'+(s.link?' card-link':'');
+      if(s.link)el.href=s.link;
       el.style.setProperty('--accent',col.c);el.style.setProperty('--accent-soft',col.s);
+      const more=s.link?'<div class="more">查看策略详情 →</div>':'<div class="more soon">详情即将上线</div>';
       el.innerHTML=`
         <div class="row1"><span class="code">${s.code}</span><span class="status ${stc}">${stl}</span></div>
         <h3>${s.name}</h3><div class="series">${s.sname}</div>
         <div class="desc">${s.desc}</div>
-        <div class="specs">${s.specs.map(([k,v])=>`<div class="spec"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')}</div>`;
+        <div class="specs">${s.specs.map(([k,v])=>`<div class="spec"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')}</div>
+        ${more}`;
       grid.appendChild(el);
     });
   }
