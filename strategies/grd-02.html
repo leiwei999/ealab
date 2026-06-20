@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>趋势智能加层系统 GRD-02 — EALab</title>
+<style>
+  :root{
+    --bg:#f6f9f8;--bg-soft:#eef3f1;--card:#ffffff;--line:#e2e9e6;--line-soft:#edf2f0;
+    --ink:#0f2922;--ink-dim:#5a7068;--ink-faint:#8fa39b;
+    --mint:#10b981;--mint-deep:#059669;--mint-soft:#d6f5e9;--mint-tint:#ecfbf4;--cyan:#0ea5b7;
+    --shadow:0 1px 3px rgba(15,41,34,.04),0 8px 24px rgba(15,41,34,.05);
+    --shadow-lift:0 4px 12px rgba(16,185,129,.12),0 16px 40px rgba(15,41,34,.10);
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft YaHei',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.7;-webkit-font-smoothing:antialiased;font-size:16px}
+  ::selection{background:var(--mint);color:#fff}
+  a{color:inherit}
+
+  header{position:sticky;top:0;z-index:50;background:rgba(246,249,248,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .nav{max-width:920px;margin:0 auto;padding:18px 28px;display:flex;align-items:center;justify-content:space-between}
+  .logo{display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:18px;letter-spacing:.3px;text-decoration:none;color:var(--ink)}
+  .logo .mark{width:32px;height:32px;border-radius:9px;background:var(--mint);display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;box-shadow:0 4px 12px rgba(16,185,129,.3)}
+  .logo b{font-weight:600}.logo .dim{color:var(--ink-dim);font-weight:400}
+  .back{font-size:14px;color:var(--ink-dim);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s}
+  .back:hover{color:var(--mint-deep)}
+
+  .wrap{max-width:920px;margin:0 auto;padding:0 28px}
+
+  /* 详情头部 */
+  .dhead{padding:56px 0 44px;position:relative}
+  .dhead::after{content:"";position:absolute;top:30px;right:0;width:320px;height:320px;background:radial-gradient(circle,rgba(16,185,129,.12),transparent 68%);border-radius:50%;z-index:-1}
+  .crumb{font-family:var(--mono);font-size:13px;color:var(--ink-faint);margin-bottom:22px;letter-spacing:.3px}
+  .crumb a{color:var(--ink-faint);text-decoration:none}.crumb a:hover{color:var(--mint-deep)}
+  .dtop{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+  .code-pill{font-family:var(--mono);font-size:13px;color:var(--mint-deep);background:var(--mint-tint);padding:5px 12px;border-radius:7px;font-weight:600}
+  .status-pill{font-size:13px;color:var(--mint);background:var(--mint-tint);padding:5px 13px;border-radius:30px;font-weight:600;display:inline-flex;align-items:center;gap:7px}
+  .status-pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+  .status-pill.pill-bt{color:var(--cyan);background:#e0f5f8}
+  .status-pill.pill-dev{color:#64748b;background:#f1f5f9}
+  .dhead h1{font-size:clamp(32px,5vw,48px);font-weight:650;letter-spacing:-1px;margin-bottom:14px;line-height:1.1}
+  .dhead .series{font-family:var(--mono);font-size:15px;color:var(--mint-deep);margin-bottom:20px}
+  .dhead .lead{font-size:18px;color:var(--ink-dim);max-width:680px;line-height:1.7}
+
+  /* 速览规格 */
+  .quickspecs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin:38px 0 8px}
+  .quickspecs .qs{background:var(--card);padding:20px 22px}
+  .quickspecs .qs .k{font-family:var(--mono);font-size:12px;color:var(--ink-faint);letter-spacing:.5px;margin-bottom:6px}
+  .quickspecs .qs .v{font-size:17px;font-weight:600}
+
+  /* 内容区块 */
+  .sec{padding:46px 0;border-bottom:1px solid var(--line)}
+  .sec:last-of-type{border-bottom:none}
+  .sec .label{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12.5px;letter-spacing:1.5px;color:var(--mint-deep);text-transform:uppercase;margin-bottom:18px;background:var(--mint-soft);padding:6px 13px;border-radius:30px}
+  .sec h2{font-size:25px;font-weight:650;letter-spacing:-.4px;margin-bottom:18px}
+  .sec p{font-size:16px;color:var(--ink-dim);margin-bottom:16px;max-width:720px}
+  .sec p strong{color:var(--ink);font-weight:600}
+
+  /* 三阶段流程 (入场/风控/离场) */
+  .flow{display:flex;flex-direction:column;gap:16px;margin-top:8px}
+  .flow .step{display:flex;gap:20px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 28px;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s}
+  .flow .step:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
+  .flow .step .ico{flex-shrink:0;width:48px;height:48px;border-radius:13px;background:var(--mint-soft);color:var(--mint-deep);display:grid;place-items:center;font-size:22px;font-weight:700;font-family:var(--mono)}
+  .flow .step .body h3{font-size:19px;font-weight:650;margin-bottom:8px}
+  .flow .step .body p{font-size:15.5px;color:var(--ink-dim);margin-bottom:0;max-width:none}
+
+  /* 风控层级 */
+  .risk-layers{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+  .risk-layers .rl{display:flex;align-items:flex-start;gap:16px;padding:18px 22px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--mint);border-radius:12px}
+  .risk-layers .rl .n{font-family:var(--mono);font-weight:700;color:var(--mint-deep);font-size:15px;flex-shrink:0;background:var(--mint-tint);width:28px;height:28px;border-radius:8px;display:grid;place-items:center}
+  .risk-layers .rl .t{font-size:15.5px;color:var(--ink-dim)}
+  .risk-layers .rl .t b{color:var(--ink)}
+
+  /* 适用性提示框 */
+  .callout{background:linear-gradient(135deg,#0f2922,#14463a);border-radius:18px;padding:32px 36px;margin-top:8px;position:relative;overflow:hidden}
+  .callout::after{content:"";position:absolute;top:-50px;right:-30px;width:240px;height:240px;background:radial-gradient(circle,rgba(16,185,129,.28),transparent 70%);border-radius:50%}
+  .callout h3{color:#f4faf7;font-size:18px;margin-bottom:12px;position:relative;z-index:1}
+  .callout p{color:#b8dccf;font-size:15.5px;margin-bottom:0;position:relative;z-index:1;max-width:none}
+
+  /* CTA */
+  .cta{text-align:center;padding:56px 0}
+  .cta h2{font-size:26px;font-weight:650;margin-bottom:12px}
+  .cta p{color:var(--ink-dim);margin-bottom:26px}
+  .cta a{display:inline-block;background:var(--mint);color:#fff;font-weight:600;font-size:16px;padding:14px 32px;border-radius:30px;text-decoration:none;box-shadow:0 6px 18px rgba(16,185,129,.32);transition:transform .2s,box-shadow .2s}
+  .cta a:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(16,185,129,.4)}
+
+  footer{border-top:1px solid var(--line);background:var(--bg-soft)}
+  .disc{max-width:920px;margin:0 auto;padding:26px 28px;font-size:13px;color:var(--ink-faint);line-height:1.8}
+
+  @media(max-width:720px){
+    .nav{padding:15px 20px}.wrap{padding:0 20px}
+    .dhead{padding:40px 0 34px}.dhead::after{width:220px;height:220px}
+    .dhead h1{font-size:30px}.dhead .lead{font-size:16.5px}
+    .sec{padding:36px 0}.sec h2{font-size:22px}
+    .flow .step{padding:22px;gap:16px}.flow .step .ico{width:42px;height:42px;font-size:19px}
+    .callout{padding:26px 24px}.cta{padding:44px 0}
+    .disc{padding:22px 20px}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="logo" href="../index.html">
+      <span class="mark">EA</span><span><b>EALab</b> <span class="dim">/ 量化策略研究</span></span>
+    </a>
+    <a class="back" href="../index.html">← 返回档案</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="dhead">
+    <div class="crumb"><a href="../index.html">策略档案</a> / Grid 系列 / GRD-02</div>
+    <div class="dtop">
+      <span class="code-pill">GRD-02</span>
+      <span class="status-pill">实盘验证中</span>
+    </div>
+    <h1>趋势智能加层系统</h1>
+    <div class="series">Grid 系列 · 旗舰资管策略</div>
+    <p class="lead">在网格加层的基础上叠加三重升级——趋势择向过滤、加仓前预演爆仓的智能加层、以及保证金危机自动对冲锁仓。它不是无脑扛单的马丁，而是一套带主动风险预判的资管系统，支持 XAU、BTC 等多品种按特性差异化配置。</p>
+  </div>
+
+  <div class="quickspecs">
+    <div class="qs"><div class="k">品种</div><div class="v">XAU / BTC 等</div></div>
+    <div class="qs"><div class="k">类型</div><div class="v">趋势智能加层</div></div>
+    <div class="qs"><div class="k">平台</div><div class="v">MT5 Hedging</div></div>
+    <div class="qs"><div class="k">核心</div><div class="v">预演加层 + 锁仓</div></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="sec">
+    <span class="label">设计理念</span>
+    <h2>给加层装上"刹车"和"安全气囊"</h2>
+    <p>加层（网格/马丁）类策略的胜率天生很高——价格回归就赢。它的全部风险集中在一件事上：<strong>极端单边行情里，加层失控、保证金耗尽、账户爆仓。</strong>绝大多数加层策略死在这一点上。</p>
+    <p>GRD-02 的全部设计，都是为了拆掉这颗炸弹。它在传统加层之上叠了三层主动防护：用<strong>趋势过滤</strong>减少逆势开仓，用<strong>智能加层</strong>在每次加仓前预演爆仓、危险就不加，用<strong>对冲锁仓</strong>在保证金触及危险线时自动锁住敞口、把生死权交还给人。这三层让"扛单"从赌博变成了有边界、有预案的风险管理。</p>
+  </div>
+
+  <div class="sec">
+    <span class="label">三重升级</span>
+    <h2>它比普通加层多了什么</h2>
+    <div class="flow">
+      <div class="step"><div class="ico">向</div><div class="body"><h3>升级一 · 趋势择向过滤</h3><p>以 MA 双周期斜率判断趋势方向，减少逆势布网。趋势反转时可主动砍掉逆势方向持仓，不让逆势仓拖累整体——加层不再"闭眼加"，而是带方向判断地加。</p></div></div>
+      <div class="step"><div class="ico">演</div><div class="body"><h3>升级二 · 智能加层（预演爆仓）</h3><p>这是核心。每次加仓前，系统先模拟"如果加了这一层、价格再走一段，账户会不会爆仓"。<strong>预演显示危险，就拒绝这次加仓。</strong>加层从被动等距变成了每步都过风险闸门的主动决策。</p></div></div>
+      <div class="step"><div class="ico">锁</div><div class="body"><h3>升级三 · 保证金对冲锁仓</h3><p>四状态机实时盯保证金水平：正常 → 接近（黄）→ 危险锁仓（红）→ 释放。触及危险线自动对冲锁仓，<strong>EA 完全停手</strong>，把损失冻结住，解套节奏交还客户手动决定。</p></div></div>
+      <div class="step"><div class="ico">盈</div><div class="body"><h3>底层 · 加层 + Trailing 止盈</h3><p>常态下按趋势方向分层建仓、摊低均价，篮子整体管理；盈利后 Trailing 跟踪锁利，TP 跟随峰值上移，即便 EA 离线也有 broker TP 兜底保护。</p></div></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="label">风控层级</span>
+    <h2>层层设防，最后一道是人</h2>
+    <div class="risk-layers">
+      <div class="rl"><span class="n">1</span><span class="t"><b>趋势过滤</b> — 减少逆势开仓，趋势反转可砍逆势仓。</span></div>
+      <div class="rl"><span class="n">2</span><span class="t"><b>加仓安全垫</b> — 每次加仓前预演爆仓，危险则拒绝加层。</span></div>
+      <div class="rl"><span class="n">3</span><span class="t"><b>分品种限层</b> — 最大层数按品种特性区分（如 BTC 与 XAU 不同），硬性封顶。</span></div>
+      <div class="rl"><span class="n">4</span><span class="t"><b>保证金状态机</b> — 实时监控，分级预警，危险线自动对冲锁仓。</span></div>
+      <div class="rl"><span class="n">5</span><span class="t"><b>人工解套节奏</b> — 锁仓后 EA 停手，何时释放由客户按钮决定，尊重人的判断。</span></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <span class="label">多品种适配</span>
+    <h2>一套框架，按品种差异化</h2>
+    <p>不同品种的波动特性天差地别——BTC 一天的波动可能是 XAU 的数倍。GRD-02 不用一套参数硬套所有品种，而是<strong>按品种特性差异化配置</strong>：限层数、加仓触发距离、风控阈值都随品种调整（例如 BTC 与 XAU 采用不同的最大层数与触发距离）。</p>
+    <p>这意味着同一套经过验证的风控框架，可以稳健地复用到多个品种上，而不是为每个品种重写一套逻辑。</p>
+  </div>
+
+  <div class="sec">
+    <span class="label">适用性与定位</span>
+    <h2>它适合什么，不适合什么</h2>
+    <p>GRD-02 适合<strong>有波动、会回归</strong>的市场——加层在回归中反复止盈，趋势过滤帮它站对方向。它在多种市场状态下的多窗口回测中表现稳健，且关键指标是<strong>零爆仓</strong>——这正是三重防护的目标所在。</p>
+    <p>必须诚实指出：它的底层仍是加层机制，<strong>持续极端单边行情</strong>始终是这类策略的终极考验。GRD-02 的答案不是"保证不亏"，而是"用预演加层不让风险失控、用对冲锁仓守住最坏情况、把最终决策权留给人"。它把加层策略的尾部风险从"不可控"变成了"有边界、有预案"。</p>
+    <div class="callout">
+      <h3>核心研究原则</h3>
+      <p>加层类策略在强趋势中天然承压，这是数学事实，无法靠参数优化消除。GRD-02 的价值不在于否认这一点，而在于直面它——趋势过滤减少站错方向、预演加层防止失控、对冲锁仓守住底线。<strong>止损与锁仓是收益的地基，不是敌人。</strong></p>
+    </div>
+  </div>
+
+  <div class="cta">
+    <h2>了解更多</h2>
+    <p>对该策略的研究细节或合作有兴趣，欢迎联系。</p>
+    <a href="../index.html#contact">联系咨询</a>
+  </div>
+
+</div>
+
+<footer>
+  <div class="disc">
+    风险提示：本页内容为量化交易策略的研究与技术分析，仅供学习与技术交流，不构成任何投资建议、收益承诺或要约。算法交易存在重大资金损失风险，历史回测表现不代表未来收益。加层/网格类策略在强趋势行情中存在显著回撤风险，对冲锁仓可冻结损失但不消除损失，使用前请充分理解其逻辑与风险。
+  </div>
+</footer>
+
+</body>
+</html>
