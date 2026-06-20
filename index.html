@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EALab — 量化交易策略研究实验室</title>
+<style>
+  :root{
+    --bg:#f6f9f8;          /* 近白带一丝青暖 */
+    --bg-soft:#eef3f1;     /* 浅区块 */
+    --card:#ffffff;        /* 卡片纯白 */
+    --line:#e2e9e6;        /* 极浅分隔线 */
+    --line-soft:#edf2f0;
+    --ink:#0f2922;         /* 主文字 墨绿黑(非纯黑,更柔) */
+    --ink-dim:#5a7068;     /* 次要文字 灰绿 */
+    --ink-faint:#8fa39b;   /* 最弱文字 */
+    --mint:#10b981;        /* 薄荷绿 主强调 */
+    --mint-deep:#059669;   /* 深薄荷 hover */
+    --mint-soft:#d6f5e9;   /* 浅薄荷 背景 */
+    --mint-tint:#ecfbf4;   /* 极浅薄荷 */
+    --cyan:#0ea5b7;        /* 青 辅助 */
+    --live:#10b981;        /* 实盘 绿 */
+    --bt:#0ea5b7;          /* 回测 青 */
+    --dev:#94a3b8;         /* 研发 灰 */
+    --purple:#7c6ce0;      /* signal */
+    --shadow:0 1px 3px rgba(15,41,34,.04),0 8px 24px rgba(15,41,34,.05);
+    --shadow-lift:0 4px 12px rgba(16,185,129,.12),0 16px 40px rgba(15,41,34,.10);
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft YaHei',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{
+    background:var(--bg);color:var(--ink);font-family:var(--sans);
+    line-height:1.65;-webkit-font-smoothing:antialiased;font-size:16px;
+  }
+  ::selection{background:var(--mint);color:#fff}
+
+  /* ===== 顶栏 ===== */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(246,249,248,.85);backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{max-width:1180px;margin:0 auto;padding:18px 28px;display:flex;align-items:center;justify-content:space-between}
+  .logo{display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:18px;letter-spacing:.3px;color:var(--ink)}
+  .logo .mark{
+    width:32px;height:32px;border-radius:9px;background:var(--mint);
+    display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;
+    box-shadow:0 4px 12px rgba(16,185,129,.3);
+  }
+  .logo b{font-weight:600}
+  .logo .dim{color:var(--ink-dim);font-weight:400}
+  .nav-links{display:flex;gap:30px;font-size:15px}
+  .nav-links a{color:var(--ink-dim);text-decoration:none;transition:color .2s;letter-spacing:.2px}
+  .nav-links a:hover{color:var(--mint-deep)}
+  @media(max-width:720px){.nav-links{display:none}}
+
+  /* ===== Hero ===== */
+  .hero{max-width:1180px;margin:0 auto;padding:96px 28px 72px;position:relative}
+  .hero::after{
+    content:"";position:absolute;top:40px;right:0;width:420px;height:420px;
+    background:radial-gradient(circle,rgba(16,185,129,.14),transparent 68%);
+    border-radius:50%;z-index:-1;pointer-events:none;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:9px;
+    font-family:var(--mono);font-size:12.5px;letter-spacing:1.5px;color:var(--mint-deep);
+    text-transform:uppercase;margin-bottom:28px;background:var(--mint-soft);
+    padding:7px 15px;border-radius:30px;
+  }
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 3px rgba(16,185,129,.2)}
+  .hero h1{
+    font-size:clamp(38px,5.8vw,68px);line-height:1.08;font-weight:650;letter-spacing:-1.5px;
+    max-width:900px;margin-bottom:30px;
+  }
+  .hero h1 .accent{color:var(--mint-deep)}
+  .hero p.lead{font-size:clamp(17px,2vw,20px);color:var(--ink-dim);max-width:600px;margin-bottom:44px;line-height:1.7}
+  .hero-meta{display:flex;gap:48px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:32px;max-width:740px}
+  .hero-meta .item .n{font-family:var(--mono);font-size:33px;color:var(--ink);font-weight:650}
+  .hero-meta .item .l{font-size:12.5px;color:var(--ink-faint);font-family:var(--mono);letter-spacing:.5px;margin-top:5px}
+
+  /* ===== Section 通用 ===== */
+  section.block{max-width:1180px;margin:0 auto;padding:64px 28px}
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:38px;padding-bottom:0;flex-wrap:wrap;gap:10px}
+  .sec-head h2{font-size:28px;font-weight:650;letter-spacing:-.5px}
+  .sec-head .tag{font-family:var(--mono);font-size:13px;color:var(--ink-faint);letter-spacing:.5px}
+
+  /* ===== 系列筛选 ===== */
+  .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:32px}
+  .filters button{
+    font-size:14px;letter-spacing:.2px;font-family:var(--sans);
+    background:var(--card);border:1px solid var(--line);color:var(--ink-dim);
+    padding:9px 18px;border-radius:30px;cursor:pointer;transition:all .18s;box-shadow:var(--shadow);
+  }
+  .filters button:hover{border-color:var(--mint);color:var(--mint-deep)}
+  .filters button.active{background:var(--mint);border-color:var(--mint);color:#fff;font-weight:600;box-shadow:0 4px 14px rgba(16,185,129,.32)}
+
+  /* ===== 策略卡片网格 ===== */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:22px}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:28px;position:relative;overflow:hidden;transition:transform .22s,box-shadow .22s,border-color .22s;
+    display:flex;flex-direction:column;box-shadow:var(--shadow);
+  }
+  .card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lift);border-color:transparent}
+  .card .row1{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:8px}
+  .card .code{
+    font-family:var(--mono);font-size:12px;color:var(--accent,var(--mint-deep));letter-spacing:.5px;
+    background:var(--accent-soft,var(--mint-tint));padding:4px 10px;border-radius:6px;font-weight:600;
+  }
+  .card .status{
+    font-size:12px;letter-spacing:.2px;padding:5px 12px;border-radius:30px;
+    white-space:nowrap;font-weight:600;display:inline-flex;align-items:center;gap:6px;
+  }
+  .card .status::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .st-live{color:var(--live);background:var(--mint-tint)}
+  .st-bt{color:var(--bt);background:#e0f5f8}
+  .st-dev{color:#64748b;background:#f1f5f9}
+  .card h3{font-size:21px;font-weight:650;margin:0 0 5px;letter-spacing:-.3px}
+  .card .series{font-family:var(--mono);font-size:13px;color:var(--accent,var(--mint-deep));margin-bottom:16px;letter-spacing:.3px}
+  .card .desc{font-size:15px;color:var(--ink-dim);margin-bottom:22px;flex-grow:1;line-height:1.65}
+  .card .specs{display:flex;flex-direction:column;gap:11px;border-top:1px solid var(--line-soft);padding-top:18px}
+  .card .spec{display:flex;justify-content:space-between;font-size:14px}
+  .card .spec .k{color:var(--ink-faint);font-family:var(--mono)}
+  .card .spec .v{color:var(--ink);font-weight:500}
+
+  /* ===== 方法论 ===== */
+  .method{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:18px}
+  .method .cell{background:var(--card);padding:32px 28px;border-radius:18px;border:1px solid var(--line);box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s}
+  .method .cell:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
+  .method .cell .icon{
+    width:44px;height:44px;border-radius:12px;background:var(--mint-soft);color:var(--mint-deep);
+    display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:15px;margin-bottom:18px;
+  }
+  .method .cell .num{font-family:var(--mono);font-size:12px;color:var(--ink-faint);letter-spacing:1px;margin-bottom:6px}
+  .method .cell h4{font-size:18px;font-weight:650;margin-bottom:9px}
+  .method .cell p{font-size:14.5px;color:var(--ink-dim);line-height:1.65}
+
+  /* ===== 研究原则 ===== */
+  .principle{margin:64px auto;max-width:1180px;padding:0 28px}
+  .principle .inner{
+    background:linear-gradient(135deg,#0f2922,#14463a);
+    border-radius:24px;padding:52px 52px;position:relative;overflow:hidden;
+    box-shadow:0 20px 50px rgba(15,41,34,.18);
+  }
+  .principle .inner::after{
+    content:"";position:absolute;top:-60px;right:-40px;width:300px;height:300px;
+    background:radial-gradient(circle,rgba(16,185,129,.3),transparent 70%);border-radius:50%;
+  }
+  .principle blockquote{font-size:clamp(20px,2.7vw,28px);font-weight:550;line-height:1.5;letter-spacing:-.4px;max-width:800px;color:#f4faf7;position:relative;z-index:1}
+  .principle blockquote .q{color:var(--mint)}
+  .principle cite{display:block;margin-top:22px;font-family:var(--mono);font-size:13px;color:#88c9b3;font-style:normal;letter-spacing:.5px;position:relative;z-index:1}
+
+  /* ===== 页脚 ===== */
+  footer{border-top:1px solid var(--line);margin-top:48px;background:var(--bg-soft)}
+  .foot{max-width:1180px;margin:0 auto;padding:52px 28px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:32px}
+  .foot .col h5{font-family:var(--mono);font-size:12.5px;color:var(--ink-faint);letter-spacing:.8px;margin-bottom:16px;text-transform:uppercase}
+  .foot .col p,.foot .col a{font-size:15px;color:var(--ink-dim);text-decoration:none;display:block;margin-bottom:9px;line-height:1.6}
+  .foot .col a:hover{color:var(--mint-deep)}
+  .disclaimer{border-top:1px solid var(--line);background:var(--bg)}
+  .disclaimer .inner{max-width:1180px;margin:0 auto;padding:24px 28px;font-size:13px;color:var(--ink-faint);line-height:1.8}
+
+  /* ===== 移动端优化 ===== */
+  @media(max-width:720px){
+    .nav{padding:15px 20px}
+    .hero{padding:56px 20px 48px}
+    .hero::after{width:280px;height:280px;top:10px}
+    .hero h1{font-size:33px;line-height:1.14;letter-spacing:-1px}
+    .hero p.lead{font-size:17px}
+    .hero-meta{gap:28px 38px;padding-top:26px}
+    .hero-meta .item .n{font-size:28px}
+    section.block{padding:48px 20px}
+    .sec-head h2{font-size:23px}
+    .principle{margin:48px auto;padding:0 20px}
+    .principle .inner{padding:34px 26px;border-radius:20px}
+    .card{padding:24px;border-radius:16px}
+    .card h3{font-size:20px}
+    .grid{grid-template-columns:1fr;gap:16px}
+    .method{gap:14px}
+    .method .cell{padding:26px 22px}
+    .foot{padding:40px 20px;gap:28px}
+    .disclaimer .inner{padding:20px}
+  }
+  @media(max-width:380px){
+    .hero h1{font-size:29px}
+    .hero-meta{gap:22px 30px}
+    .filters button{font-size:13px;padding:8px 14px}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="logo">
+      <span class="mark">EA</span>
+      <span><b>EALab</b> <span class="dim">/ 量化策略研究</span></span>
+    </div>
+    <nav class="nav-links">
+      <a href="#strategies">策略档案</a>
+      <a href="#method">研究方法</a>
+      <a href="#principle">研究原则</a>
+      <a href="#contact">联系</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="eyebrow"><span class="dot"></span>Algorithmic Trading Research</div>
+  <h1>系统化交易策略的<br><span class="accent">设计、验证与迭代</span>实验室</h1>
+  <p class="lead">面向 XAUUSD、指数及加密品种的量化策略研究。每一个策略都经过真实数据回测、蒙特卡洛稳健性检验与实盘并行验证，再进入迭代。</p>
+  <div class="hero-meta">
+    <div class="item"><div class="n">14+</div><div class="l">STRATEGY ARCHIVES</div></div>
+    <div class="item"><div class="n">4</div><div class="l">RESEARCH SERIES</div></div>
+    <div class="item"><div class="n">12mo</div><div class="l">REAL M1 DATASET</div></div>
+    <div class="item"><div class="n">MT4/5</div><div class="l">PLATFORM</div></div>
+  </div>
+</div>
+
+<section class="block" id="strategies">
+  <div class="sec-head">
+    <h2>策略档案</h2>
+    <span class="tag">// 脱敏展示</span>
+  </div>
+  <div class="filters" id="filters">
+    <button class="active" data-f="all">全部</button>
+    <button data-f="hedge">Hedge 系列</button>
+    <button data-f="quantum">Quantum 系列</button>
+    <button data-f="trend">Trend 系列</button>
+    <button data-f="signal">Signal 系列</button>
+  </div>
+  <div class="grid" id="grid"></div>
+</section>
+
+<section class="block" id="method">
+  <div class="sec-head">
+    <h2>研究方法</h2>
+    <span class="tag">// METHODOLOGY</span>
+  </div>
+  <div class="method">
+    <div class="cell">
+      <div class="icon">01</div><div class="num">DESIGN</div>
+      <h4>策略设计</h4>
+      <p>从市场结构与交易逻辑出发定义入场、风控与离场规则，明确策略适用的市场状态（趋势 / 震荡 / 单边）。</p>
+    </div>
+    <div class="cell">
+      <div class="icon">02</div><div class="num">BACKTEST</div>
+      <h4>真实数据回测</h4>
+      <p>使用券商导出的真实 M1 数据（非平台模拟）进行回测，校准点值、点差、ATR 分布，杜绝参数与真实环境脱节。</p>
+    </div>
+    <div class="cell">
+      <div class="icon">03</div><div class="num">ROBUSTNESS</div>
+      <h4>稳健性检验</h4>
+      <p>Walk-forward 前推验证与蒙特卡洛重排，检验策略在样本外与极端排列下的回撤上限，识别过拟合。</p>
+    </div>
+    <div class="cell">
+      <div class="icon">04</div><div class="num">VALIDATION</div>
+      <h4>实盘并行验证</h4>
+      <p>多账户并行运行参数变体，固定观察窗口后基于真实成交数据决策，绝不以回测结论直接上实盘。</p>
+    </div>
+  </div>
+</section>
+
+<div class="principle" id="principle">
+  <div class="inner">
+    <blockquote><span class="q">"</span>止损是收益的地基，不是敌人。<span class="q">"</span> 在真实数据中，正是风控机制构成了薄利之上的正期望；移除它去等待反转，只会摧毁这点优势。</blockquote>
+    <cite>— EALab 核心研究原则之一</cite>
+  </div>
+</div>
+
+<footer id="contact">
+  <div class="foot">
+    <div class="col" style="max-width:320px">
+      <div class="logo" style="margin-bottom:16px">
+        <span class="mark">EA</span><span><b>EALab</b></span>
+      </div>
+      <p>系统化交易策略研究实验室。专注于可验证、有风控、数据驱动的算法交易系统。</p>
+    </div>
+    <div class="col">
+      <h5>研究系列</h5>
+      <a href="#strategies">Hedge — 对冲网格</a>
+      <a href="#strategies">Quantum — 马丁网格</a>
+      <a href="#strategies">Trend — 趋势跟踪</a>
+      <a href="#strategies">Signal — 信号复制</a>
+    </div>
+    <div class="col">
+      <h5>联系</h5>
+      <a href="#">研究合作咨询</a>
+      <a href="#">策略定制</a>
+    </div>
+  </div>
+  <div class="disclaimer">
+    <div class="inner">
+      风险提示：本站所展示内容为量化交易策略的研究与技术分析，仅供学习与技术交流，不构成任何投资建议、收益承诺或要约。算法交易存在重大资金损失风险，历史回测表现不代表未来收益。任何策略在不同市场状态下表现可能显著不同，使用前请充分理解其逻辑与风险。
+    </div>
+  </div>
+</footer>
+
+<script>
+  const STRATS = [
+    {series:'hedge', sname:'Hedge 系列', code:'HDG-01', name:'对冲网格系统', status:'live',
+     desc:'双向对冲网格策略，面向高波动金属品种。以分层篮子管理 + 深档止盈 + 拖尾保护构成多重风控层级。',
+     specs:[['品种','XAUUSD'],['类型','对冲网格'],['周期','M1 / M5'],['状态','实盘验证中']]},
+    {series:'quantum', sname:'Quantum 系列', code:'QTM-01', name:'量子马丁网格', status:'live',
+     desc:'基于均线偏离的双向马丁网格。层数封顶 + 强平保护构成核心风控，杜绝无限加仓导致的尾部风险。',
+     specs:[['品种','XAUUSD'],['类型','马丁网格'],['风控','层数封顶+强平'],['状态','实盘验证中']]},
+    {series:'quantum', sname:'Quantum 系列', code:'QTM-02', name:'RSI 智能网格', status:'bt',
+     desc:'逆势均值回归 + 网格分层 + 智能护航离场。双时间框架 RSI 入场信号，方向自适应分层上限。',
+     specs:[['品种','XAUUSD'],['类型','均值回归'],['验证','一年真实M1'],['状态','回测完成']]},
+    {series:'trend', sname:'Trend 系列', code:'TRD-01', name:'趋势回踩系统', status:'bt',
+     desc:'EMA 趋势过滤 + 回踩入场 + RSI 确认。多周期协同，仅在主趋势方向捕捉回踩机会。',
+     specs:[['品种','XAUUSD'],['类型','趋势回踩'],['周期','H1 / H4'],['状态','回测完成']]},
+    {series:'trend', sname:'Trend 系列', code:'TRD-02', name:'多周期趋势跟踪', status:'bt',
+     desc:'H4 趋势方向 + 多周期入场过滤，全金额制管理。图形化面板与按钮交互，适配多品种。',
+     specs:[['品种','XAUUSD'],['类型','趋势跟踪'],['管理','全金额制'],['状态','回测完成']]},
+    {series:'trend', sname:'Trend 系列', code:'TRD-03', name:'四确定性趋势', status:'dev',
+     desc:'以"带止损入场、固定盈亏比、明确资金管理、系统一致性"为框架的低频趋势系统。ATR 动态止损，3:1 盈亏比。',
+     specs:[['品种','XAUUSD'],['类型','低频趋势'],['盈亏比','3 : 1'],['状态','研发中']]},
+    {series:'trend', sname:'Trend 系列', code:'TRD-04', name:'集群剥头皮猎手', status:'dev',
+     desc:'双保险止损 + 智能止盈的集群剥头皮系统，面向金属品种的短线机会捕捉。',
+     specs:[['品种','XAUUSD'],['类型','剥头皮'],['止损','双保险'],['状态','研发中']]},
+    {series:'signal', sname:'Signal 系列', code:'SIG-01', name:'信号复制系统', status:'live',
+     desc:'跨平台信号复制基础设施（发送端 + 接收端）。支持挂单同步、低延迟心跳、协议版本兼容，构成跟单系统底座。',
+     specs:[['平台','MT4 / MT5'],['类型','信号复制'],['延迟','约 50ms'],['状态','实盘运行']]},
+  ];
+  const COLORS = {
+    hedge:{c:'#10b981',s:'#ecfbf4'}, quantum:{c:'#0ea5b7',s:'#e0f5f8'},
+    trend:{c:'#16a34a',s:'#e9f9ee'}, signal:{c:'#7c6ce0',s:'#f0edfb'}
+  };
+  const STATUS = {live:['st-live','实盘验证'],bt:['st-bt','回测完成'],dev:['st-dev','研发中']};
+
+  function render(filter){
+    const grid=document.getElementById('grid');grid.innerHTML='';
+    STRATS.filter(s=>filter==='all'||s.series===filter).forEach(s=>{
+      const [stc,stl]=STATUS[s.status];const col=COLORS[s.series];
+      const el=document.createElement('div');el.className='card';
+      el.style.setProperty('--accent',col.c);el.style.setProperty('--accent-soft',col.s);
+      el.innerHTML=`
+        <div class="row1"><span class="code">${s.code}</span><span class="status ${stc}">${stl}</span></div>
+        <h3>${s.name}</h3><div class="series">${s.sname}</div>
+        <div class="desc">${s.desc}</div>
+        <div class="specs">${s.specs.map(([k,v])=>`<div class="spec"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')}</div>`;
+      grid.appendChild(el);
+    });
+  }
+  render('all');
+  document.getElementById('filters').addEventListener('click',e=>{
+    if(e.target.tagName!=='BUTTON')return;
+    document.querySelectorAll('#filters button').forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');render(e.target.dataset.f);
+  });
+</script>
+</body>
+</html>
