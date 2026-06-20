@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>对冲网格系统 HDG-01 — EALab</title>
+<title>择向网格系统 GRD-01 — EALab</title>
 <style>
   :root{
     --bg:#f6f9f8;--bg-soft:#eef3f1;--card:#ffffff;--line:#e2e9e6;--line-soft:#edf2f0;
@@ -115,21 +115,21 @@
 
 <div class="wrap">
   <div class="dhead">
-    <div class="crumb"><a href="../index.html">策略档案</a> / Hedge 系列 / HDG-01</div>
+    <div class="crumb"><a href="../index.html">策略档案</a> / Grid 系列 / GRD-01</div>
     <div class="dtop">
-      <span class="code-pill">HDG-01</span>
-      <span class="status-pill ">实盘验证中</span>
+      <span class="code-pill">GRD-01</span>
+      <span class="status-pill">实盘验证中</span>
     </div>
-    <h1>对冲网格系统</h1>
-    <div class="series">Hedge 系列 · 双向对冲网格策略</div>
-    <p class="lead">面向高波动金属品种的双向对冲网格。多空两侧同时布局，以分层篮子管理、深档止盈与拖尾保护构成多重风控层级，在波动中寻找结构性机会。</p>
+    <h1>择向网格系统</h1>
+    <div class="series">Grid 系列 · 信号择向 + 网格加仓</div>
+    <p class="lead">不盲目双向挂单，而是先用 RSI 与 ADX 判断方向，再在选定方向上分层布网。多空两侧各自独立成篮，配合三层止盈与五道断臂风控，把网格策略最危险的单边行情风险关进笼子。</p>
   </div>
 
   <div class="quickspecs">
     <div class="qs"><div class="k">品种</div><div class="v">XAUUSD</div></div>
-    <div class="qs"><div class="k">类型</div><div class="v">对冲网格</div></div>
+    <div class="qs"><div class="k">类型</div><div class="v">择向网格</div></div>
     <div class="qs"><div class="k">周期</div><div class="v">M1 / M5</div></div>
-    <div class="qs"><div class="k">核心</div><div class="v">分层篮子+拖尾</div></div>
+    <div class="qs"><div class="k">核心</div><div class="v">择向 + 五道断臂</div></div>
   </div>
 </div>
 
@@ -137,41 +137,42 @@
 
   <div class="sec">
     <span class="label">设计理念</span>
-    <h2>用对冲结构平滑单向风险</h2>
-    <p>单向网格最怕方向判断错——一旦持续走反，浮亏会单边累积。对冲网格的思路是<strong>多空两侧同时运作</strong>：无论价格往哪走，总有一侧在盈利方向上，用它来平滑另一侧的浮亏，把"赌方向"变成"管理两个方向的篮子"。</p>
-    <p>但对冲不是目的，<strong>风控才是</strong>。HDG-01 的重点在于每个篮子的生命周期管理：何时止盈、何时收紧、何时主动了结。它追求的不是抓住每一波，而是让账户在反复波动中保持可控的回撤曲线。</p>
+    <h2>先判方向，再布网</h2>
+    <p>传统网格往往两个方向同时挂单，赌价格在区间内来回。问题是——<strong>市场一旦走出单边趋势，逆势那一侧的网格会持续承压，浮亏单边累积。</strong>这是所有网格策略的共同软肋。</p>
+    <p>GRD-01 的应对是<strong>不盲目双向，而是择向布网</strong>：先用 RSI 判断超买超卖、用 ADX 与 DI 判断趋势强弱与方向，确认信号后才在选定方向上分层建仓。它把"赌区间"变成"顺信号方向做网格"，从入场环节就降低了逆势布网的概率。</p>
   </div>
 
   <div class="sec">
     <span class="label">运作机制</span>
     <h2>策略如何运转</h2>
     <div class="flow">
-      <div class="step"><div class="ico">入</div><div class="body"><h3>入场 — 双向网格布局</h3><p>在价格区间内按设定间距分层布置多空订单。两个方向各自独立成篮，互不干扰，分别管理。</p></div></div>
-      <div class="step"><div class="ico">层</div><div class="body"><h3>分层 — 篮子逐级建仓</h3><p>价格向某方向运行时，该方向篮子逐层成交建仓，另一方向篮子则逐步止盈了结。分层间距决定了策略的密度与节奏。</p></div></div>
-      <div class="step"><div class="ico">盈</div><div class="body"><h3>止盈 — 篮子整体目标 + 深档TP</h3><p>同方向篮子作为整体管理，浮盈达目标即整体平仓。深档止盈机制为持仓较深的篮子设置专门的了结目标，避免深套。</p></div></div>
-      <div class="step"><div class="ico">控</div><div class="body"><h3>风控 — 拖尾保护 + 预防性了结</h3><p>盈利篮子启用拖尾保护锁定利润；当篮子风险积累到设定水平时，预防性了结主动降低敞口，而非被动等待。</p></div></div>
+      <div class="step"><div class="ico">向</div><div class="body"><h3>择向 — RSI + ADX 判断方向</h3><p>RSI 触及超卖考虑做多、触及超买考虑做空；ADX 与 DI 差值确认趋势强度与方向。两套信号共同决定在哪个方向开网，而非两侧同时挂单。</p></div></div>
+      <div class="step"><div class="ico">网</div><div class="body"><h3>布网 — 分层网格加仓</h3><p>在选定方向上按设定档距分层建仓，逐层摊低均价。多空两侧各自独立成篮、独立核算，互不拖累。最大档数设有硬上限。</p></div></div>
+      <div class="step"><div class="ico">盈</div><div class="body"><h3>止盈 — 三层 TP 系统</h3><p>篮子整体管理。浅档常规止盈；深档自动压缩目标（持仓越深，单位目标越小），加快深套篮子了结；浮亏改善后启动 Trailing 追踪锁利。</p></div></div>
+      <div class="step"><div class="ico">断</div><div class="body"><h3>风控 — 五道断臂防线</h3><p>四级断臂按浮亏深度逐级了结、加上单边信号触发的冷静期，构成五道防线。每次断臂事件都写入 CSV，便于事后复盘。<strong>这套断臂机制决定了最大单次损失上限。</strong></p></div></div>
     </div>
   </div>
 
   <div class="sec">
     <span class="label">风控层级</span>
-    <h2>多重防线</h2>
+    <h2>五道防线，逐级收紧</h2>
     <div class="risk-layers">
-      <div class="rl"><span class="n">1</span><span class="t"><b>分层篮子管理</b> — 多空篮子独立核算，各自止盈各自风控，互不拖累。</span></div>
-      <div class="rl"><span class="n">2</span><span class="t"><b>深档止盈</b> — 为深层持仓设专门了结目标，缩短深套篮子的暴露时间。</span></div>
-      <div class="rl"><span class="n">3</span><span class="t"><b>拖尾保护</b> — 盈利篮子动态跟踪，回吐到设定幅度即锁定离场。</span></div>
-      <div class="rl"><span class="n">4</span><span class="t"><b>预防性了结</b> — 风险积累到阈值时主动降敞口，避免单一篮子失控。</span></div>
+      <div class="rl"><span class="n">1</span><span class="t"><b>择向入场</b> — 从源头减少逆势布网，避免一开始就站错方向。</span></div>
+      <div class="rl"><span class="n">2</span><span class="t"><b>档数封顶</b> — 网格最大档数硬性限制，杜绝无限加仓。</span></div>
+      <div class="rl"><span class="n">3</span><span class="t"><b>四级断臂</b> — 按浮亏深度分级，逐级主动了结承压篮子。</span></div>
+      <div class="rl"><span class="n">4</span><span class="t"><b>单边冷静期</b> — 检测到单边趋势信号后暂停开新篮，避开危险时段。</span></div>
+      <div class="rl"><span class="n">5</span><span class="t"><b>Trailing 锁利 + CSV 留痕</b> — 盈利篮子追踪锁利；所有断臂事件落盘可复盘。</span></div>
     </div>
   </div>
 
   <div class="sec">
     <span class="label">适用性与定位</span>
     <h2>它适合什么，不适合什么</h2>
-    <p>HDG-01 在<strong>区间震荡与双向波动</strong>的环境中最舒适——价格在区间内来回，两侧篮子反复止盈，回撤曲线平稳。</p>
-    <p>它的考验同样来自<strong>强趋势单边行情</strong>：逆势一侧的篮子会持续承压。这正是深档止盈、拖尾保护、预防性了结这套组合存在的意义——在单边行情里主动管理逆势篮子的风险，而不是放任其无限累积。</p>
+    <p>GRD-01 在<strong>有方向感的波动行情</strong>中表现最自然——择向布网顺着信号方向吃回归，深档压缩与 Trailing 加快了结。实盘观察显示，它在普通波动与温和趋势日里回撤可控。</p>
+    <p>它的终极考验仍是<strong>极端单边行情</strong>：再准的择向也有判错的时候。这正是四级断臂与单边冷静期存在的意义——判错时主动断臂、控制损失，而不是死扛等反转。择向降低了入场风险，断臂兜住了最坏情况，两者缺一不可。</p>
     <div class="callout">
       <h3>核心研究原则</h3>
-      <p>网格策略在强趋势中天然承压，这是数学事实而非可以"优化掉"的缺陷。HDG-01 的全部风控设计，都是为了在承认这一点的前提下，把单边行情的损失控制在可承受范围内。</p>
+      <p>网格策略在强趋势中天然承压，这是数学事实，不是可以"优化掉"的缺陷。GRD-01 的全部设计——择向入场、档数封顶、五道断臂——都建立在承认这一点之上：用择向减少站错方向，用断臂锁住最坏损失。<strong>止损是收益的地基，不是敌人。</strong></p>
     </div>
   </div>
 
@@ -185,7 +186,7 @@
 
 <footer>
   <div class="disc">
-    风险提示：本页内容为量化交易策略的研究与技术分析，仅供学习与技术交流，不构成任何投资建议、收益承诺或要约。算法交易存在重大资金损失风险，历史回测表现不代表未来收益。使用前请充分理解其逻辑与风险。
+    风险提示：本页内容为量化交易策略的研究与技术分析，仅供学习与技术交流，不构成任何投资建议、收益承诺或要约。算法交易存在重大资金损失风险，历史回测表现不代表未来收益。网格类策略在强趋势行情中存在显著回撤风险，使用前请充分理解其逻辑与风险。
   </div>
 </footer>
 

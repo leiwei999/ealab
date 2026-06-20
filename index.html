@@ -259,7 +259,7 @@
   </div>
   <div class="filters" id="filters">
     <button class="active" data-f="all">全部</button>
-    <button data-f="hedge">Hedge 系列</button>
+    <button data-f="grid">Grid 系列</button>
     <button data-f="quantum">Quantum 系列</button>
     <button data-f="trend">Trend 系列</button>
     <button data-f="signal">Signal 系列</button>
@@ -344,7 +344,7 @@
     </div>
     <div class="col">
       <h5>研究系列</h5>
-      <a href="#strategies">Hedge — 对冲网格</a>
+      <a href="#strategies">Grid — 择向网格</a>
       <a href="#strategies">Quantum — 马丁网格</a>
       <a href="#strategies">Trend — 趋势跟踪</a>
       <a href="#strategies">Signal — 信号复制</a>
@@ -368,9 +368,9 @@
     document.getElementById('revealBtn').style.display='none';
   }
   const STRATS = [
-    {series:'hedge', sname:'Hedge 系列', code:'HDG-01', link:'strategies/hdg-01.html', name:'对冲网格系统', status:'live',
-     desc:'双向对冲网格策略，面向高波动金属品种。以分层篮子管理 + 深档止盈 + 拖尾保护构成多重风控层级。',
-     specs:[['品种','XAUUSD'],['类型','对冲网格'],['周期','M1 / M5'],['状态','实盘验证中']]},
+    {series:'grid', sname:'Grid 系列', code:'GRD-01', link:'strategies/grd-01.html', name:'择向网格系统', status:'live',
+     desc:'信号择向网格策略。先用 RSI + ADX 判断方向，再在选定方向分层布网，配合三层止盈与五道断臂风控。',
+     specs:[['品种','XAUUSD'],['类型','择向网格'],['周期','M1 / M5'],['状态','实盘验证中']]},
     {series:'quantum', sname:'Quantum 系列', code:'QTM-01', name:'量子马丁网格', status:'live',
      link:'strategies/qtm-01.html',
      desc:'基于均线偏离的双向马丁网格。层数封顶 + 强平保护构成核心风控，杜绝无限加仓导致的尾部风险。',
@@ -395,7 +395,7 @@
      specs:[['平台','MT4 / MT5'],['类型','信号复制'],['延迟','约 50ms'],['状态','实盘运行']]},
   ];
   const COLORS = {
-    hedge:{c:'#10b981',s:'#ecfbf4'}, quantum:{c:'#0ea5b7',s:'#e0f5f8'},
+    grid:{c:'#10b981',s:'#ecfbf4'}, quantum:{c:'#0ea5b7',s:'#e0f5f8'},
     trend:{c:'#16a34a',s:'#e9f9ee'}, signal:{c:'#7c6ce0',s:'#f0edfb'}
   };
   const STATUS = {live:['st-live','实盘验证'],bt:['st-bt','回测完成'],dev:['st-dev','研发中']};
